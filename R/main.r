@@ -1,0 +1,467 @@
+#Begin functions
+#y is the response
+#sv are the confounding variables used as a stratification
+#xs are the instrumental variables
+#w is the mismeasured exposure variable
+#z are the covariates that are not confounding or instrumental. These may or may not be specified.
+#The number of controls, "capm", is currently the same for all strata.
+#The function first checks and see if the sv,xs, or z are factors
+#and create extra dummy variables if they are.
+#
+
+meiv=function(y, sv, xs, w, z=NULL,sv.factor=NULL,xs.factor=NULL,
+              z.factor=NULL, alpha=0.05,scale=TRUE){
+
+    #
+    #Check 1: Verify variables have been specified
+    if(missing(y)) stop("Stopping program...need to specify response y")  
+    if(missing(sv)) stop("Stopping program...need to specify confounder variables sv")  
+    if(missing(xs)) stop("Stopping program...need to specify instrument variables xs")  
+    if(missing(w)) stop("Stopping program...need to specify mismeasured variable w")  
+  
+  #Second read in data 
+  n=sum(y)
+  if(!is.null(dim(w))){
+    w=w[,1]
+  }
+  row.w=length(w)
+  cat("The number of mismeasured observations  is",row.w,"\n")
+  row.y=length(y) #Assume y is a vector
+  cat("The number of response observations  is",row.y,"\n")
+  
+  #Confounding/stratification variables information
+  if (!is.null(sv.factor)){
+    cat("Stratification variables", sv.factor,"are specified as categorical","\n")
+    #First scale non factor confounders
+    if (scale==TRUE){
+      sv.names=colnames(sv)
+      if (length(sv.factor)!=length(intersect(sv.factor,sv.names))) stop("Stopping program, a specified stratification factor
+                                                                         variable not found")
+      #Determine which variables are not factors
+      sv.transform.var=setdiff(sv.names,sv.factor)
+      
+      cat("Transforming the following stratification variables",sv.transform.var,"\n")
+      sv[sv.transform.var]= sapply(sv[sv.transform.var], function(x) c(scale(x)))
+    }
+    sv[sv.factor]=lapply(sv[sv.factor], factor)
+    #Determine which variables are factors
+    list.of.sv.factors=names(which(sapply(sv,class)=="factor"))
+    #
+    #Create new factor variables
+    for (i in 1:length(list.of.sv.factors)){
+      #
+      #Find levels of variable
+      #For now assuming reference level is smallest number
+      old.levels=sort(unique(as.numeric(do.call(paste0, sv[list.of.sv.factors[i]]))))
+      cat("Old levels of factor variable",list.of.sv.factors[i] ,"are",old.levels,"\n")
+      
+      #
+      #Make reference category of zero by subtracting smallest level of factor 
+      #variable from each observation
+      new.levels=as.numeric(old.levels)-min(old.levels)
+      cat("New levels of factor variable are",new.levels,"\n")
+      new.levels.values=as.numeric(do.call(paste0, sv[list.of.sv.factors[i]]))-min(old.levels)
+      new.dum.vars=new.levels[2:length(new.levels)]
+      #Create new dummy variable
+      for (j in 1:length(new.dum.vars)){
+        #
+        #Create name of new dummy variable
+        newdummy=paste(list.of.sv.factors[i],new.dum.vars[j],sep=".")
+        #
+        #Assign value of new variable 
+        sv=cbind(sv,assign(newdummy,as.numeric(new.levels.values==new.levels[(j+1)]))) #create new variable based on dummy
+        names(sv)[dim(sv)[2]]=newdummy
+      }
+      
+      #
+      #Drop the variable from the dataframe
+      sv[list.of.sv.factors[i]]=NULL
+      
+    }
+  } else{
+    cat("No specified stratification factor variables.")
+    if (scale==TRUE){
+      cat("Transforming all stratification variables","\n")
+      sv=scale(sv)
+    }}
+  sv=data.frame(sv) 
+  dimsv=dim(sv)
+  len.sv=dim(sv)[2]
+  if (names(sv)[1]=="X1") {
+    names.sv=rep(NA,len.sv)
+    for (i in 1:len.sv){
+      names.sv[i]=paste("Confounder SV",i)
+    }
+  } else {
+    names.sv=names(sv) 
+  }
+  row.sv=dim(sv)[1]
+  cat("The number of observations in the confounding variables are",row.sv,"\n")
+  
+  #
+  #
+  #Instrument variables information
+  if (!is.null(xs.factor)){
+    cat("Instrumental variables", xs.factor,"are specified as categorical")
+    #First scale non factor confounders
+    if (scale==TRUE){
+      xs.names=colnames(xs)
+      if (length(xs.factor)!=length(intersect(xs.factor,xs.names))) stop("Stopping program, a specified instrumental factor 
+                                                                         variable not found")
+      xs.transform.var=setdiff(xs.names,xs.factor)
+      cat("Transforming the following instrumental variables",xs.transform.var,"\n")
+      xs[xs.transform.var]= lapply(xs[xs.transform.var], function(x) c(scale(x)))
+    }
+    xs[xs.factor]=lapply(xs[xs.factor], factor)
+    #Determine which variables are factors
+    list.of.xs.factors=names(which(sapply(xs,class)=="factor"))
+    #
+    #Create new factor variables
+    for (i in 1:length(list.of.xs.factors)){
+      #
+      #Find levels of variable
+      #For now assuming reference level is smallest number
+      old.levels=sort(unique(as.numeric(do.call(paste0, xs[list.of.xs.factors[i]]))))
+      cat("Old levels of factor variable",list.of.xs.factors[i] ,"are",old.levels,"\n")
+      
+      #
+      #Make reference category of zero by subtracting smallest level of factor 
+      #variable from each observation
+      new.levels=as.numeric(old.levels)-min(old.levels)
+      cat("New levels of factor variable are",new.levels,"\n")
+      new.levels.values=as.numeric(do.call(paste0, xs[list.of.xs.factors[i]]))-min(old.levels)
+      new.dum.vars=new.levels[2:length(new.levels)]
+      #Create new dummy variable
+      for (j in 1:length(new.dum.vars)){
+        #
+        #Create name of new dummy variable
+        newdummy=paste(list.of.xs.factors[i],new.dum.vars[j],sep=".")
+        #
+        #Assign value of new variable 
+        xs=cbind(xs,assign(newdummy,as.numeric(new.levels.values==new.levels[(j+1)]))) #create new variable based on dummy
+        names(xs)[dim(xs)[2]]=newdummy
+      }
+      
+      #
+      #Drop the variable from the dataframe
+      xs[list.of.xs.factors[i]]=NULL
+      
+    }
+  } else{
+    cat("No specified instrumental factor variables.")
+    if (scale==TRUE){
+      cat("Transforming all instrumental variables","\n")
+      xs=scale(xs)
+    }}
+  xs=data.frame(xs) 
+  dimxs=dim(xs)
+  len.xs=dim(xs)[2]
+  row.xs=dim(xs)[1]
+  cat("The number of observations in instruments variables are",row.xs,"\n")
+  if (names(xs)[1]=="X1") {
+    names.xs=rep(NA,len.xs)
+    for (i in 1:len.xs){
+      names.xs[i]=paste("Instrument XS",i)
+    }
+  } else {
+    names.xs=names(xs)
+  }
+  
+  #
+  #
+  #Miscellaneous covariate variables information
+  if (!missing(z)){
+    cat("Covariates were specified.")
+    if (!is.null(z.factor)){
+      cat("Additional covariates z", z.factor,"are specified as categorical","\n")
+      #First scale non factor confounders
+      if (scale==TRUE){
+        z.names=colnames(z)
+        if (length(z.factor)!=length(intersect(z.factor,z.names))) stop("Stopping program, a specified covariate factor 
+                                                                        variable not found")
+        z.transform.var=setdiff(z.names,z.factor)
+        z[z.transform.var]= lapply(z[z.transform.var], function(x) c(scale(x)))
+      }
+      z[z.factor]=lapply(z[z.factor], factor)
+      #Determine which variables are factors
+      list.of.z.factors=names(which(sapply(z,class)=="factor"))
+      #
+      #Create new factor variables
+      for (i in 1:length(list.of.z.factors)){
+        #
+        #Find levels of variable
+        #For now assuming reference level is smallest number
+        old.levels=sort(unique(as.numeric(do.call(paste0, z[list.of.z.factors[i]]))))
+        cat("Old levels of factor variable",list.of.z.factors[i] ,"are",old.levels,"\n")
+        
+        #
+        #Make reference category of zero by subtracting smallest level of factor 
+        #variable from each observation
+        new.levels=as.numeric(old.levels)-min(old.levels)
+        cat("New levels of factor variable are",new.levels,"\n")
+        new.levels.values=as.numeric(do.call(paste0, z[list.of.z.factors[i]]))-min(old.levels)
+        new.dum.vars=new.levels[2:length(new.levels)]
+        #Create new dummy variable
+        for (j in 1:length(new.dum.vars)){
+          #
+          #Create name of new dummy variable
+          newdummy=paste(list.of.z.factors[i],new.dum.vars[j],sep=".")
+          #
+          #Assign value of new variable 
+          z=cbind(z,assign(newdummy,as.numeric(new.levels.values==new.levels[(j+1)]))) #create new variable based on dummy
+          names(z)[dim(z)[2]]=newdummy
+        }
+        
+        #
+        #Drop the variable from the dataframe
+        z[list.of.z.factors[i]]=NULL
+        
+      }
+    } else{
+      cat("No specified z covariate factor variables.","\n")
+      if (scale==TRUE){
+        cat("Transforming all additional covariates variables","\n")
+        z=scale(z)
+      }}
+    z=data.frame(z) 
+    names.z=names(z)
+    len.z=dim(z)[2]
+    row.z=dim(z)[1]
+    cat("The number of observations in covariates are",row.z,"\n")
+    if (names(z)[1]=="X1") {
+      betanames.z=rep(NA,len.z)
+      for (i in 1:len.z){
+        betanames.z[i]=paste("beta",i)
+      }
+    } else {
+      names.z=names(z)
+      betanames.z=names(z)
+    }
+  } else{
+    cat("No covariates were specified.","\n")
+  }
+  
+    #
+    #2.Verify there is no missing data
+    if(is.na(sum(y))) stop("Stopping program...missing values in y") 
+    if(is.na(sum(sv))) stop("Stopping program...missing values in sv")
+    if(is.na(sum(xs))) stop("Stopping program...missing values in xs")
+    if(is.na(sum(w))) stop("Stopping program...missing values in w")
+    if(is.na(sum(z))) stop("Stopping program...missing values in z")
+    
+    #
+    #Dimensions of data the same
+    #Check if other variables have same number of observations as y
+    if (!missing(z)){
+      if (!all(sapply(list(row.sv, row.xs, row.z, row.w), FUN = identical, row.y)))
+       {col.dim=sapply(list(row.sv, row.xs, row.z, row.w), FUN = identical, row.y)
+        variable.names=c("Confounding Variables","Instrumental Variables","Covariates","Mismeasured variable")
+        for (i in 1:length(variable.names))
+          {if (col.dim[i]==FALSE) cat("The",variable.names[i],"has less observations than the response y.")}
+        stop("Different dimensions.") 
+      }
+    } else {
+      if (!all(sapply(list(row.sv, row.xs,  row.w), FUN = identical, row.y)))
+      {col.dim=sapply(list(row.sv, row.xs,  row.w), FUN = identical, row.y)
+      variable.names=c("confounding variables","instrumental variables","mismeasured variable")
+      for (i in 1:length(variable.names))
+      {if (col.dim[i]==FALSE) cat("The",variable.names[i],"has less observations than the response y.")}
+      stop("Different dimensions.") 
+      }
+      
+      
+    }
+    #
+    #Determining number of controls, capm
+    case.position=c(which(y==1),length(y))
+    if (y[length(y)]==0){
+      case.position=c(which(y==1),(length(y)+1))
+    }
+    length.case.position=length(case.position)
+    capm=case.position[2:length.case.position]-case.position[1:(length.case.position-1)]-1
+    if (length(unique(capm))!=1)
+        {stop("The number of controls is not equal for all stratum.") 
+    } else {
+      capm=as.numeric(min(capm))
+    }
+
+##########FORMAT DATA for analysis
+#Need the length of the vectors for the variables to determine
+#the number of parameters required
+#n=total number of cases
+#capm=number of controls for each case
+
+#number of parameters needed for first likelihood
+#1 parameter for intercept, parameters for sv and tstar
+#and 2 parameters for the misclassification proabibilities alpha0 and alpha1
+no.par.one=sum(1,len.sv,len.xs,2)
+cat("Number of gamma and eta parameters estimating is ",no.par.one,"\n")
+#number of parameters needed for the second likelihood
+if (!missing(z))
+{
+  no.par.two=sum(1,len.z)
+} else {
+  no.par.two=1
+}
+
+cat("Number of beta parameters estimating is ",no.par.two,"\n")
+#total number of parameters
+n.allpar=no.par.one+no.par.two
+cat("Number of total parameters estimating is",n.allpar,"\n")
+#Used for the starting value in estimating parameters of eta and gamma
+startingvalues=runif(no.par.one, -0.75, 0.75)
+
+#Used for naive analysis of mismeasured covariate w
+#Additionally, naive.estimate.beta is used as a starting point
+#for calculating beta
+myv=rep(rnorm(n), each=(capm+1))
+myst= rep(1:n, each=(capm+1)) 
+if(!missing(z)){
+  covariates=paste0("z$",names.z,collapse= "+")
+  formula = as.formula(paste("Surv(myv, y) ~ ", "w+",covariates,"+strata(myst)"))
+} else
+{
+  formula = as.formula(paste("Surv(myv, y) ~ ", "w+","strata(myst)"))
+}
+
+outw=coxph(formula)
+naive.estimate.beta=as.numeric(outw$coef)
+
+
+#
+#
+#
+##############Begin estimation###############
+##Part 1 - Estimation of parameters for gamma and eta
+#Run function part1
+cat("Estimating gamma and eta parameters...","\n")
+part1.results=.part1(no.cases=n, no.controls.per.set=capm, y=y,
+                    sv=sv,w=w,xs=xs,startingvalues=startingvalues,len.xs=len.xs,len.sv=len.sv
+                    ,no.par.one=no.par.one,no.par.two=no.par.two,nallpara=nallpara)
+#
+#Grab results and store for subsequent functions
+prt1_1=part1.results$prt1_1
+alpha.0.1=part1.results$alpha.0.1
+alpha.1.1=part1.results$alpha.1.1
+prw1_1=part1.results$prw1_1
+par.int=part1.results$par.int
+par.xs=part1.results$par.xs
+par.sv=part1.results$par.sv
+par.eta=part1.results$par.eta
+hess.mat=part1.results$hess.mat
+par.set=c(par.int,par.xs,par.sv,par.eta)
+#These parameters give information about the analysis
+a.deriv=part1.results$a.deriv
+nlglik.val.1=part1.results$nlglik.val
+converge.1=part1.results$converge
+cat("Done","\n")
+#
+#
+#
+##Part 2 - Estimation of parameters for beta
+#Run function part2
+cat("Estimating beta parameters...","\n")
+if(!missing(z)){
+part2.results=.part2(y=y,sv=sv,w=w,xs=xs,z=z,prt1_1=prt1_1,
+                    alpha.0.1=alpha.0.1,alpha.1.1=alpha.1.1,
+                    prw1_1=prw1_1,naiveestimate=naive.estimate.beta,len.xs=len.xs,
+                    len.sv=len.sv,len.z=len.z,
+                    no.par.one=no.par.one,no.par.two=no.par.two,n=n,capm=capm,nallpara=nallpara)
+} else {
+  part2.results=.part2noz(y=y,sv=sv,w=w,xs=xs,prt1_1=prt1_1,
+                      alpha.0.1=alpha.0.1,alpha.1.1=alpha.1.1,
+                      prw1_1=prw1_1,naiveestimate=naive.estimate.beta,
+                      len.xs=len.xs,len.sv=len.sv,
+                      no.par.one=no.par.one,no.par.two=no.par.two,n=n,capm=capm,nallpara=nallpara) 
+}
+#
+#Grab functions for subsequent functions
+#These parameters give information about the analysis
+beta=part2.results$beta
+nlglik.val.beta=part2.results$nlglik.val
+converge.2=part2.results$converge
+cat("Done","\n")
+
+#
+#
+#
+##Part 3 - Estimation of standard errors for the parameters of gamma, eta, betam and alpha.0 and alpha.1
+##Calculating middle term of asymptotic variance
+#Run function part3
+cat("Estimating Standard Errors of estimates...","\n")
+allpara=c(par.set,beta)
+nallpara=length(allpara)
+if (!missing(z)) {
+part3.results=.part3(beta=beta,par=par.set,
+               y=y,sv=sv,w=w,xs=xs,z=z,prt1_1=prt1_1,alpha.0.1=alpha.0.1,
+               alpha.1.1=alpha.1.1,prw1_1=prw1_1,len.xs=len.xs,len.sv=len.sv,len.z=len.z,
+               no.par.one=no.par.one,
+               no.par.two=no.par.two,n=n,capm=capm,nallpara=nallpara)
+} else {
+  part3.results=.part3noz(beta=beta,par=par.set,
+                      y=y,sv=sv,w=w,xs=xs,prt1_1=prt1_1,alpha.0.1=alpha.0.1,
+                      alpha.1.1=alpha.1.1,prw1_1=prw1_1,len.xs=len.xs,len.sv=len.sv,
+                      no.par.one=no.par.one,
+                      no.par.two=no.par.two,n=n,capm=capm,nallpara=nallpara)
+}
+
+#
+#Grab functions for subsequent functions
+uvec.1=part3.results$uvec.1
+mid.term.1=part3.results$mid.term.1
+
+#
+#
+#
+##Part 4 - Estimation of standard errors for the parameters of gamma, eta, and beta
+##Calculating middle term of asymptotic variance
+#Run function part4
+if (!missing(z)) {
+part4.results=.part4(mid.term.1=mid.term.1,hess.mat=hess.mat,y=y,sv=sv,w=w,xs=xs,z=z,
+                       allpara=allpara,len.xs=len.xs,len.sv=len.sv,len.z=len.z,no.par.one=no.par.one,
+                       no.par.two=no.par.two,n=n,capm=capm,nallpara=nallpara)
+} else {
+  part4.results=.part4noz(mid.term.1=mid.term.1,hess.mat=hess.mat,y=y,sv=sv,w=w,xs=xs,
+                         allpara=allpara,len.xs=len.xs,len.sv=len.sv,no.par.one=no.par.one,
+                         no.par.two=no.par.two,n=n,capm=capm,nallpara=nallpara)
+  
+}
+
+#
+#Grab functions for subsequent functions
+var.cov=part4.results$var.cov.1
+par.sd=part4.results$theta.sd.1
+cat("Done","\n")
+
+#
+#
+#
+##Part 5 - Calculate alpha level, Wald CI, and pvalues for the parameter estimates
+alpha=as.numeric(alpha)
+cat("Now calculating Confidence Intervals and P-values with an alpha=",alpha,"level of significance.","\n")
+if (!missing(z)){
+param.labels=c("gamma_Intercept",names.xs,names.sv,"eta_1","eta_2","beta_w",betanames.z,"alpha0","alpha1")
+} else{
+  param.labels=c("gamma_Intercept",names.xs,names.sv,"eta_1","eta_2","beta_w","alpha0","alpha1")
+  }
+
+final.results=.finalpart(par.set=par.set,beta=beta,no.par.one=no.par.one,
+                        par.sd=par.sd,var.cov=var.cov,alpha=alpha,
+                        param.labels=param.labels,n.allpar=n.allpar)
+cat("Estimation of parameters and standard errors is complete.","\n")
+cat("\n")
+cat("Results of the analysis of the 1:",capm," matched case control data where the exposure variable is misclassified:","\n")
+cat("\n")
+
+print(final.results,quote=FALSE,row.names=FALSE)
+
+cat("\n")
+cat("Naive analysis using misclassified variable:","\n")
+cat("\n")
+
+print(outw,quote=FALSE,row.names=FALSE)
+
+return(list(final.results=final.results,par.set=par.set,beta=beta,var.cov=var.cov,naive.estimates=outw))
+
+#End function
+}
