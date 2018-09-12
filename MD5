@@ -1,4 +1,4 @@
-5ef55694c62fae5707758c7626e4d122 *DESCRIPTION
+fb174e0355620fa78a3a60d01cc69508 *DESCRIPTION
 d9795b3a0fdc3b9731f8603dab6b3131 *NAMESPACE
 88e0a8ec8d238d9da533ab7008d36613 *R/functions.r
 cd5980f635fcf1bfdc1aa83fc19edccd *R/main.r
@@ -10,7 +10,7 @@ ca04ffa0c7500441ab1d44796563c66a *R/stderr1.r
 dac8e05f147a0c53c0458cf262277e33 *R/stderr1_no_z.r
 099a66dc396bcc074b36a42d230b8a84 *R/stderr2.r
 daf02b619e89c8af11d171203178402d *R/stderr2_no_z.r
-05b7549867ab30020e171278c2e14d64 *build/partial.rdb
+5c9ea77cd61e7dc8ae9f6cf4d5be88b2 *build/partial.rdb
 263ebd7d19c26ac2b629324c906ff4a2 *data/matcdata.RData
 ead17fa29153216d203997b82a1f8354 *data/matcdata2.RData
 06133843545b4af1ff8061a54eb3f80a *data/matcdatamult.RData
