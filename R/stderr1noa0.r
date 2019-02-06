@@ -3,7 +3,7 @@
 
 #Perhaps use data from nlglik2.r rather than recalculating data
 #
-.part3=function(beta,par,y,sv,w,xs,z,prt1_1,alpha.0.1,alpha.1.1,prw1_1,len.xs,len.sv,len.z,no.par.one,no.par.two,n,capm,nallpara){
+.part3noa0=function(beta,par,y,sv,w,xs,z,prt1_1,alpha.1.1,prw1_1,len.xs,len.sv,len.z,no.par.one,no.par.two,n,capm,nallpara){
   
 
   ##Next we calculate the standard errors of all of the parameters
@@ -18,12 +18,12 @@
   beta.g=beta[1]
   beta.z=beta[2:no.par.two]
   
-  exp.g.w1.1= (exp(beta.g)*(1-alpha.1.1)*prt1_1 +alpha.0.1*(1-prt1_1))/ prw1_1
-  exp.g.w0.1= (exp(beta.g)*alpha.1.1*prt1_1+(1-alpha.0.1)*(1-prt1_1))/(1-prw1_1)
+  exp.g.w1.1= (exp(beta.g)*(1-alpha.1.1)*prt1_1)/prw1_1
+  exp.g.w0.1= (exp(beta.g)*alpha.1.1*prt1_1+(1-prt1_1))/(1-prw1_1)
   
-  deriv.beta1.g.w1.1=(exp(beta.g)*(1-alpha.1.1)*prt1_1)/(exp(beta.g)*(1-alpha.1.1)*prt1_1 +alpha.0.1*(1-prt1_1))
+  deriv.beta1.g.w1.1=1
   
-  deriv.beta1.g.w0.1=(exp(beta.g)*alpha.1.1*prt1_1)/(exp(beta.g)*alpha.1.1*prt1_1+(1-alpha.0.1)*(1-prt1_1))
+  deriv.beta1.g.w0.1=(exp(beta.g)*alpha.1.1*prt1_1)/(exp(beta.g)*alpha.1.1*prt1_1+(1-prt1_1))
   
   deriv.beta1.g.1=deriv.beta1.g.w1.1*w+(1-w)*deriv.beta1.g.w0.1
   
@@ -31,7 +31,7 @@
   
   ################ conditional probability calculation
   sum.xs=as.vector(as.matrix(z)%*%beta.z)
-  term1.2=exp.g.1*exp(sum.xs) 
+  term1.2=exp.g.1*exp(sum.xs)
   term2.2=matrix(term1.2, ncol=(capm+1), byrow=T)
   term3.2=rep(apply(term2.2, 1, sum), each=(capm+1))
   cond.prob.2=term1.2/term3.2
@@ -47,7 +47,7 @@
   #Need terms involving the instrument and the stratification variables
   #Will need for loops because we don't know the number of strat variables and instruments
   term11=(
-    (1-y)*(1-alpha.0.1-alpha.1.1)*prt1_1*
+    (1-y)*(1-alpha.1.1)*prt1_1*
       (1-prt1_1)*(w-prw1_1)/(prw1_1*(1-prw1_1))
   )
   
@@ -79,24 +79,21 @@
   #U equations for eta
   term2= (1-y)*(w-prw1_1)/(prw1_1*(1-prw1_1))
   
-  uveceta1=term2*( alpha.0.1*(1-alpha.0.1)-alpha.0.1*(1-alpha.0.1-alpha.1.1)*prt1_1 )
-  uveceta1.mat=matrix(uveceta1,ncol=(capm+1),byrow=T)
-  uvec.1[,(1+len.xs+len.sv+len.z+1)]=apply(uveceta1.mat,1,sum)
-  uveceta2= term2*( -alpha.0.1*alpha.1.1-alpha.1.1*(1-alpha.0.1-alpha.1.1)*prt1_1) 
+  uveceta2= term2*( -alpha.1.1*(1-alpha.1.1)*prt1_1) 
   uveceta2.mat=matrix(uveceta2,ncol=(capm+1),byrow=T)
-  uvec.1[,(1+len.xs+len.sv+len.z+2)]=apply(uveceta2.mat,1,sum)
+  uvec.1[,(1+len.xs+len.sv+len.z+1)]=apply(uveceta2.mat,1,sum)
   
   #U equations for beta
   newterm1.1=y-cond.prob.2
   
   mult.1=(newterm1.1)*deriv.beta1.g.1
   mult.mat.1=matrix(mult.1,ncol=(capm+1),byrow=T)
-  uvec.1[,(1+len.xs+len.sv+len.z+3)]=apply(mult.mat.1,1,sum)
+  uvec.1[,(1+len.xs+len.sv+len.z+2)]=apply(mult.mat.1,1,sum)
   
   for (i in 1:len.z){
   uvecbetaz=newterm1.1*z[,i]
   uvecbetaz.mat=matrix(uvecbetaz,ncol=(capm+1),byrow=T)
-  uvec.1[,(1+len.xs+len.sv+len.z+3+i)]=apply(uvecbetaz.mat,1,sum)
+  uvec.1[,(1+len.xs+len.sv+len.z+2+i)]=apply(uvecbetaz.mat,1,sum)
   }
   
   ##After calculating the uvec, we can now calculate the middle term 

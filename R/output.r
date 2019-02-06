@@ -24,14 +24,15 @@
   var.err.alpha.0=J0%*%V%*%t(J0)
   var.err.alpha.1=J1%*%V%*%t(J1)
   
-  alpha.0
-  alpha.1
   alpha0.sd=sqrt(var.err.alpha.0)
   alpha1.sd=sqrt(var.err.alpha.1)
   
   #parameters and standard errors
-  estimates=round(c(par.set,beta,alpha.0,alpha.1),digits=5)
-  se=round(c(par.sd,alpha0.sd,alpha1.sd),digits=5)
+  #estimates=round(c(par.set,beta,alpha.0,alpha.1),digits=5)
+  estimates=round(beta,digits=5)
+  exp_estimates=round(exp(beta),digits=5)
+  #se=round(c(par.sd,alpha0.sd,alpha1.sd),digits=5)
+  se=round(c(par.sd[(no.par.one+1):(n.allpar)]),digits=5)
   
   #
   #test statistics 
@@ -40,7 +41,8 @@
   test.stat.alpha0=round(alpha.0/alpha0.sd,digits=5)
   test.stat.alpha1=round(alpha.1/alpha1.sd,digits=5)
   
-  test.stat=c(test.stat.par.set,test.stat.beta,test.stat.alpha0,test.stat.alpha1)
+  #test.stat=c(test.stat.par.set,test.stat.beta,test.stat.alpha0,test.stat.alpha1)
+  test.stat=c(test.stat.beta)
   
   #
   #Calculate p values
@@ -49,7 +51,8 @@
   pval.alpha0=round(2*pnorm(-abs(test.stat.alpha0)),digits=5)
   pval.alpha1=round(2*pnorm(-abs(test.stat.alpha1)),digits=5)
   
-  pval.stat=c(pval.par.set,pval.beta,pval.alpha0,pval.alpha1)
+  #pval.stat=c(pval.par.set,pval.beta,pval.alpha0,pval.alpha1)
+  pval.stat=c(pval.beta)
   
   #
   #Calculate 1-alpha CI
@@ -58,8 +61,8 @@
   CI.par.set.upper=round(par.set+crit.val*par.sd[1:(no.par.one)],digits=5)
   
   
-  CI.beta.lower=round(beta-crit.val*par.sd[(no.par.one+1):(n.allpar)],digits=5)
-  CI.beta.upper=round(beta+crit.val*par.sd[(no.par.one+1):(n.allpar)],digits=5)
+  CI.beta.lower=round(exp(estimates-crit.val*se),digits=5)
+  CI.beta.upper=round(exp(estimates+crit.val*se),digits=5)
   
   CI.alpha0.lower=round(alpha.0-crit.val*alpha0.sd,digits=5)
   CI.alpha0.upper=round(alpha.0+crit.val*alpha0.sd,digits=5)
@@ -67,14 +70,17 @@
   CI.alpha1.lower=round(alpha.1-crit.val*alpha1.sd,digits=5)
   CI.alpha1.upper=round(alpha.1+crit.val*alpha1.sd,digits=5)
   
-  CI.lower=c(CI.par.set.lower,CI.beta.lower,CI.alpha0.lower,CI.alpha1.lower)
-  CI.upper=c(CI.par.set.upper,CI.beta.upper,CI.alpha0.upper,CI.alpha1.upper)
+  #CI.lower=c(CI.par.set.lower,CI.beta.lower,CI.alpha0.lower,CI.alpha1.lower)
+  #CI.upper=c(CI.par.set.upper,CI.beta.upper,CI.alpha0.upper,CI.alpha1.upper)
+  
+  CI.lower=c(CI.beta.lower)
+  CI.upper=c(CI.beta.upper)
   
   #
   #create labels for output
-  finalresults.output=cbind(param.labels,estimates, se,as.numeric(test.stat),as.numeric(CI.lower),as.numeric(CI.upper),as.numeric(pval.stat))
-  colnames(finalresults.output)=c("Parameter Estimates","Value","S.E.", "Z_Value","CI_Lower_Limit","CI_Upper_Limit","P-Value")
-
+  finalresults.output=cbind(as.numeric(estimates), as.numeric(exp_estimates), as.numeric(se),as.numeric(test.stat),as.numeric(pval.stat),as.numeric(CI.lower),as.numeric(CI.upper))
+  colnames(finalresults.output)=c("coef","exp(coef)","se(coef)", "z","Pr(>|z|)","lower_ci","upper_ci")
+  rownames(finalresults.output)=param.labels
   return(result=finalresults.output)
 
 }

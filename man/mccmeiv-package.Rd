@@ -9,8 +9,12 @@
 \packageDescription{mccmeiv}
 }
 \details{
-This package implements the methodology found in Manuel, Wang and Sinha (2018) used to estimate parameters of a matched case control design
-with a mismeasured exposure variable by using instrumental variables.
+
+The DESCRIPTION file:
+\packageDESCRIPTION{mccmeiv}
+\packageIndices{mccmeiv}
+This package implements the methodology found in Manuel et al. to estimate parameters of a logistic model using data from a 
+matched case control design with a mismeasured exposure variable by using instrumental variables.
 }
 \author{
 \packageAuthor{mccmeiv}
@@ -19,19 +23,14 @@ Maintainer: \packageMaintainer{mccmeiv}
 }
 
 \references{
-Manuel, CM, Wang, S, and Sinha, S (2018). Matched case-control data with a misclassified exposure: 
-What can be done with instrumental variables? 
-}
-
-\seealso{
-\code{\link{meiv}}
-\code{\link{matcdata}}
-\code{\link{matcdata2}}
-\code{\link{matcdatamult}}
+Manuel, CM, Sinha, S and  Wang, S. Matched case-control data with a misclassified exposure: 
+What can be done with instrumental variables? (Submitted).
 }
 
 \keyword{ Mismeasured}
 \keyword{ Matched Cased Control}
 \keyword{ Instrumental}
 \keyword{ bias}
+
+
 

@@ -1,5 +1,5 @@
 #Begin file
-.part1 <- function(no.cases, no.controls.per.set, y,sv,w,xs,z,startingvalues,len.xs,len.sv,len.z,no.par.one,no.par.two,n,capm,nallpara ){
+.part1noa0 <- function(no.cases, no.controls.per.set, y,sv,w,xs,z,startingvalues,len.xs,len.sv,len.z,no.par.one,no.par.two,n,capm,nallpara ){
 #set variables and variable dimension
 
 ##
@@ -17,20 +17,20 @@ nlglik_1=function(par){
   par.xs=par[2:(1+len.xs)]
   par.sv=par[(2+len.xs):(1+len.xs+len.sv)]
   par.z=par[(2+len.xs+len.sv):(1+len.xs+len.sv+len.z)]
-  par.eta=par[(no.par.one-1):(no.par.one)]
+  par.eta=par[no.par.one]
   par.set=c(par.int,par.xs,par.sv,par.z,par.eta)
   #
   ## prpi=pr(X=1|X^*, Z) # a logistic model is assumed 
-  #prt1_1a=1/(1+exp(-par.int+nrSum(par.xs,xs)+nrSum(par.sv,sv)+nrSum(par.z,z)))
+  #prt1_1=1/(1+exp(-par.int+nrSum(par.xs,xs)+nrSum(par.sv,sv)+nrSum(par.z,z)))
   sum.xs=as.vector(as.matrix(xs)%*%par.xs)
   sum.sv=as.vector(as.matrix(sv)%*%par.sv)
   sum.z=as.vector(as.matrix(z)%*%par.z)
   prt1_1=1/(1+exp(-par.int-sum.xs-sum.sv-sum.z))
   #
-  ## alpha.0.1=pr(W=1|X=0, Z)     
-  alpha.0.1=1/(1+exp(-par.eta[1])+exp(par.eta[2]-par.eta[1]) )
+  ## alpha.0.1=pr(W=1|X=0, Z)=0
   ##   alpha.1.1=pr(W=0|X=1, Z)
-  alpha.1.1=1/(1+exp(-par.eta[2])+exp(par.eta[1]-par.eta[2]) )
+  alpha.1.1=1/(1+exp(-par.eta) )
+  
   
   #
   #In the event that we get an extremely high or extremely low
@@ -39,7 +39,7 @@ nlglik_1=function(par){
   prt1_1[prt1_1<0.00001]=0.00001
   #
   # prw.1=pr(W=1|X^*, Z)
-  prw1_1=alpha.0.1+(1-alpha.0.1-alpha.1.1)*prt1_1
+  prw1_1=(1-alpha.1.1)*prt1_1
   prw1_1[prw1_1>0.99999]=0.99999
   prw1_1[prw1_1<0.00001]=0.00001
   
@@ -59,23 +59,22 @@ par.int=par2[1]
 par.xs=par2[2:(1+len.xs)]
 par.sv=par2[(2+len.xs):(1+len.xs+len.sv)]
 par.z=par2[(2+len.xs+len.sv):(1+len.xs+len.sv+len.z)]
-par.eta=par2[(no.par.one-1):(no.par.one)]
+par.eta=par2[no.par.one]
 
-#
+
 sum.xs=as.vector(as.matrix(xs)%*%par.xs)
 sum.sv=as.vector(as.matrix(sv)%*%par.sv)
 sum.z=as.vector(as.matrix(z)%*%par.z)
 prt1_1=1/(1+exp(-par.int-sum.xs-sum.sv-sum.z))
-## alpha.0.1=pr(W=1|X=0, Z)     
-alpha.0.1=1/(1+exp(-par.eta[1])+exp(par.eta[2]-par.eta[1]) )
+## alpha.0.1=pr(W=1|X=0, Z)=0    
 ##   alpha.1.1=pr(W=0|X=1, Z)
-alpha.1.1=1/(1+exp(-par.eta[2])+exp(par.eta[1]-par.eta[2]) )
+alpha.1.1=1/(1+exp(-par.eta) )
 
-prw1_1=alpha.0.1+(1-alpha.0.1-alpha.1.1)*prt1_1
+prw1_1=(1-alpha.1.1)*prt1_1
 
 
 #End of function
-return(list(prt1_1=prt1_1,alpha.0.1=alpha.0.1,alpha.1.1=alpha.1.1,prw1_1=prw1_1,pars2=par2,
+return(list(prt1_1=prt1_1,alpha.1.1=alpha.1.1,prw1_1=prw1_1,pars2=par2,
             par.int=par.int,par.xs=par.xs,par.sv=par.sv,par.z=par.z,par.eta=par.eta,
             hess.mat=out2$hessian,nlglik.val=out2$value,converge=out2$convergence))
 }

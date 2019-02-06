@@ -4,18 +4,18 @@
 
 
 #first calculate starting values from naive analysis
-.part2=function(no.cases, no.controls.per.set, y,sv,w,xs,z,prt1_1,alpha.0.1,alpha.1.1,prw1_1,naiveestimate,len.xs,len.sv,len.z,no.par.one,no.par.two,n,capm,nallpara){
+.part2noa0=function(no.cases, no.controls.per.set, y,sv,w,xs,z,prt1_1,alpha.1.1,prw1_1,naiveestimate,len.xs,len.sv,len.z,no.par.one,no.par.two,n,capm,nallpara){
 nlglik2=function(beta){
   
   beta.g=beta[1]
   beta.z=beta[2:no.par.two]
   
-  exp.g.w1.1= (exp(beta.g)*(1-alpha.1.1)*prt1_1 +alpha.0.1*(1-prt1_1))/ prw1_1
-  exp.g.w0.1= (exp(beta.g)*alpha.1.1*prt1_1+(1-alpha.0.1)*(1-prt1_1))/(1-prw1_1)
+  exp.g.w1.1= (exp(beta.g)*(1-alpha.1.1)*prt1_1 +0*(1-prt1_1))/ prw1_1
+  exp.g.w0.1= (exp(beta.g)*alpha.1.1*prt1_1+(1-0)*(1-prt1_1))/(1-prw1_1)
   
-  deriv.beta1.g.w1.1=(exp(beta.g)*(1-alpha.1.1)*prt1_1)/(exp(beta.g)*(1-alpha.1.1)*prt1_1 +alpha.0.1*(1-prt1_1))
+  deriv.beta1.g.w1.1=1
   
-  deriv.beta1.g.w0.1=(exp(beta.g)*alpha.1.1*prt1_1)/(exp(beta.g)*alpha.1.1*prt1_1+(1-alpha.0.1)*(1-prt1_1))
+  deriv.beta1.g.w0.1=(exp(beta.g)*alpha.1.1*prt1_1)/(exp(beta.g)*alpha.1.1*prt1_1+(1-0)*(1-prt1_1))
   
   deriv.beta1.g.1=deriv.beta1.g.w1.1*w+(1-w)*deriv.beta1.g.w0.1
   
