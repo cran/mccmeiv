@@ -1,4 +1,4 @@
-47032ff804a601acd8612ba0b6f904aa *DESCRIPTION
+b7f98c258a9d96c96b0b01b5fa8bef97 *DESCRIPTION
 8e1ac5dac21b9b5cec1480334fe0a048 *NAMESPACE
 57c4fcce5099e4777a84645b9c06152a *R/meivm3.r
 5a9ab6948eddfbebcd272ded79bb98a5 *R/meivm4.r
@@ -20,11 +20,11 @@ dc5689241360b2f05a36d4e84759de9c *R/stderr1noa1.r
 60c5a639239b2caebebe6679a2e83cb6 *R/stderr2.r
 96ba89d50c4c72b32ead474aec27320f *R/stderr2noa0.r
 0dd3974f98d4d38343834e522362825c *R/stderr2noa1.r
-7e2f1e4bd3c5ec32c1085227b4a5573f *build/partial.rdb
+e7e11d8bf16e01c959886c4207e19dd3 *build/partial.rdb
 c4c1d67fb3a77b1af2bdf0dba03bbfa2 *data/matcdata.RData
 ee18d7cd1ab4bd30e40e9bf07489333d *data/matcdatamult.RData
-49acc4e0529ae8e91e17df96ac03cf77 *man/matcdata.Rd
-1f2d2ef2edcde229a62f4c5cba21ec4d *man/matcdatamult.Rd
-7ca57b2e59f515e337624db3c4b96ffe *man/mccmeiv-package.Rd
-9147439fcb8bc44930994f1088e32362 *man/meivm3.Rd
-4ac56ca6f458bcb1c0c07e1c4d4ca46f *man/meivm4.Rd
+67ab6d8421751467c26c9d98914048b6 *man/matcdata.Rd
+e479757731e23d841a8177d85619790f *man/matcdatamult.Rd
+f5263441a538e159e36ecfadf3ded93f *man/mccmeiv-package.Rd
+281374c5b096f0c7b626fc33930ab338 *man/meivm3.Rd
+c23bd315b84f1b335476cf58a86be950 *man/meivm4.Rd

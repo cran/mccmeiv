@@ -8,7 +8,7 @@ A sample dataset representing matched case control data.
 \description{
 An example data set with 1 binary response (y), 1 stratification variable (sv), 
 1 mismeasured binary exposure (w), 1 prognostic factor (z),
-and 1 instrumental variable (xs) for use with the meiv function.
+and 1 instrumental variable (xs) for use with the meivm3 or meivm4 functions.
 }
 
 \usage{

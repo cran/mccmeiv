@@ -42,28 +42,28 @@ Specify whether any prognostic variables are categorical by using the name of th
 Specify the level of significance for calculating the (1-alpha)100\% Wald confidence intervals of the odds ratio parameter. For example, the default alpha=0.05 generates a 95\% confidence interval of the odds ratio.
 }
   \item{scale}{
-By default, all non factors/numeric variables (those that are not specified as either response, mismeasured covariate, or factors specified in xs.factor/sv.factor/z.factor) are automatically scaled and centered unless the user sets scale=FALSE. Moreover, no numeric binary variables are scaled. 
+By default, all non factors/numeric variables (those that are not specified as either response, mismeasured covariate, or factors specified in xs.factor / sv.factor / z.factor) are automatically scaled and centered unless the user sets scale=FALSE. Moreover, no numeric binary variables are scaled. 
 }
   \item{setalpha0.to.0}{
-Sets the misclassification probability Pr(W=1|X=0,Y=0)=Pr(W=1|X=0,Y=1) to 0 so that it is not estimated. By default this set to FALSE. Note that this option and setalpha1.to.0 cannot be both set to TRUE simultaneously.
+Sets the misclassification probability Pr(W=1|X=0,Y=0) = Pr(W=1|X=0,Y=1) to 0 so that it is not estimated. By default this set to FALSE. Note that this option and setalpha1.to.0 cannot be both set to TRUE simultaneously.
 }
   \item{setalpha1.to.0}{
-Sets the misclassification probability Pr(W=0|X=1,Y=0)=Pr(W=0|X=1,Y=1) to 0 so that it is not estimated. By default this is set to FALSE. Note that this option and setalpha0.to.0 cannot be both set to TRUE simultaneously.
+Sets the misclassification probability Pr(W=0|X=1,Y=0) = Pr(W=0|X=1,Y=1) to 0 so that it is not estimated. By default this is set to FALSE. Note that this option and setalpha0.to.0 cannot be both set to TRUE simultaneously.
 }
 }
 \details{
 Estimation of the parameters is done in two steps. In the first step the set of parameters gamma used to model the probability of true exposure status X,
-Pr(X=1|SV,XS,Y=0), and the parameters eta0 and eta1 used to model the misclassification probabilities alpha.0=Pr(W=1|X=0,Y=0)=Pr(W=1|X=0,Y=1)
-and alpha.1=Pr(W=0|X=1,Y=0)=Pr(W=0|X=1,Y=1) are estimated. This information is then used in the second step to calculate  Pr(Y=1|SV,XS,Z). The solution is found via the optim function, using the "L-BFGS-B" method. For the first step, 
+Pr(X=1|SV,XS,Y=0), and the parameters eta0 and eta1 used to model the misclassification probabilities alpha.0 = Pr(W=1|X=0,Y=0) = Pr(W=1|X=0,Y=1)
+and alpha.1 = Pr(W=0|X=1,Y=0) = Pr(W=0|X=1,Y=1) are estimated. This information is then used in the second step to calculate  Pr(Y=1|SV,XS,Z). The solution is found via the optim function, using the "L-BFGS-B" method. For the first step, 
 the starting values come from a logistic regression of W on the instruments, confounders, and prognostic factors. The starting values for eta 0 and eta 1 are set to 0.
 Finally, the starting values for the second step use the naive beta estimates. 
 
 }
 \value{
-\item{two.step.results }{Provides estimates for the beta parameters using the two step instrumental variable analysis. 
+\item{two.step.results }{Provides estimates for the beta parameters of the logistic model for the response y using the two step instrumental variable analysis. 
 Standard errors, p-values, and the (1-alpha)100\% Wald confidence intervals for exp(beta) are also included in the output.}
 
-\item{naive.results }{Provides estimates for the beta parameters using the a naive approach. 
+\item{naive.results }{Provides estimates for the beta parameters of the logistic model for the response y using the naive approach. 
 Standard errors, p-values, and the (1-alpha)100\% Wald confidence intervals for exp(beta) are also included in the output.}
 
 }

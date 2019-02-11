@@ -9,7 +9,7 @@ stratification/instrumental/miscellaneous variables.
 \description{
 An example data set with 1 binary response (y), 2 stratification variable (sv1 and sv2), 
 1 mismeasured binary exposure (w),  2 prognostic factors (z1 and z2),
-and 2 instruments (xs1 and xs2) for use with the meiv function.
+and 2 instruments (xs1 and xs2) for use with the meivm3 or meivm4 functions.
 }
 
 \usage{

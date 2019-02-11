@@ -6,16 +6,16 @@
 \packageTitle{mccmeiv}
 }
 \description{
-\packageDescription{mccmeiv}
+%\packageDescription{mccmeiv}
+This package implements the methodology found in Manuel et al. to estimate parameters of a logistic model using data from a matched case control design with a mismeasured exposure variable with the help of instrumental variables.
 }
-\details{
+%\details{
 
-The DESCRIPTION file:
-\packageDESCRIPTION{mccmeiv}
-\packageIndices{mccmeiv}
-This package implements the methodology found in Manuel et al. to estimate parameters of a logistic model using data from a 
-matched case control design with a mismeasured exposure variable by using instrumental variables.
-}
+%The DESCRIPTION file:
+%\packageDESCRIPTION{mccmeiv}
+%\packageIndices{mccmeiv}
+%This package implements the methodology found in Manuel et al. to estimate parameters of a logistic model using data from a matched case control design with a mismeasured exposure variable with the help of instrumental variables.
+%}
 \author{
 \packageAuthor{mccmeiv}
 
